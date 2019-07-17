@@ -1,32 +1,18 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 
-
-import movies from '../api/movie-database';
+import { fetchMovie } from '../actions';
 import MovieCard from './MovieCard';
 import Loading from './Loading';
 import '../styles/style.css'
 
 class App extends React.Component {
-    state = {
-        movie: null,
-        terms: '',
-        isLoading: false,
-    }
-
-    onGetMovies = async (terms) => {
-        this.setState({ isLoading: true });
-        const response = await movies
-            .get('/', {
-                params: {
-                    apikey: '4730a825',
-                    t: terms,
-                }
-            });
-        this.setState({ movie: response.data, isLoading: false });
+    onGetMovies = (terms) => {
+        this.props.fetchMovie(terms);
     }
 
     onEnterInput (key) {
@@ -36,10 +22,10 @@ class App extends React.Component {
     }
 
     renderCards () {
-        if (this.state.isLoading) {
+        if (this.props.isLoading) {
             return(<Loading />);
-        } else if (!this.state.isLoading && this.state.movie) {
-            return(<MovieCard data={{...this.state.movie}} />);
+        } else if (!this.props.isLoading && this.props.movie) {
+            return(<MovieCard data={{...this.props.movie}} />);
         } else {
             return(<p>No Movie</p>);
         }
@@ -67,4 +53,10 @@ class App extends React.Component {
     }
 }
 
-export default App;
+const mapStateToProps = (state) => {
+    return { movie: state.movie, isLoading: false, };
+}
+
+export default connect(mapStateToProps, {
+    fetchMovie
+})(App);
